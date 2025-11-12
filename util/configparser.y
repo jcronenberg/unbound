@@ -204,6 +204,7 @@ extern struct config_parser_state* cfg_parser;
 %token VAR_PROXY_PROTOCOL_PORT VAR_STATISTICS_INHIBIT_ZERO
 %token VAR_HARDEN_UNKNOWN_ADDITIONAL VAR_DISABLE_EDNS_DO VAR_CACHEDB_NO_STORE
 %token VAR_LOG_DESTADDR VAR_CACHEDB_CHECK_WHEN_SERVE_EXPIRED
+%token VAR_ITER_SCRUB_PROMISCUOUS
 
 %%
 toplevelvars: /* empty */ | toplevelvars toplevelvar ;
@@ -341,7 +342,7 @@ content_server: server_num_threads | server_verbosity | server_port |
 	server_interface_automatic_ports | server_ede |
 	server_proxy_protocol_port | server_statistics_inhibit_zero |
 	server_harden_unknown_additional | server_disable_edns_do |
-	server_log_destaddr
+	server_log_destaddr | server_iter_scrub_promiscuous
 	;
 stubstart: VAR_STUB_ZONE
 	{
@@ -4007,6 +4008,16 @@ server_cookie_secret: VAR_COOKIE_SECRET STRING_ARG
 			OUTYY(("P(Compiled without ipset, ignoring)\n"));
 			free($2);
 		#endif
+		}
+	;
+	server_iter_scrub_promiscuous: VAR_ITER_SCRUB_PROMISCUOUS STRING_ARG
+		{
+			OUTYY(("P(server_iter_scrub_promiscuous:%s)\n", $2));
+			if(strcmp($2, "yes") != 0 && strcmp($2, "no") != 0)
+				yyerror("expected yes or no.");
+			else cfg_parser->cfg->iter_scrub_promiscuous =
+				(strcmp($2, "yes")==0);
+			free($2);
 		}
 	;
 %%
